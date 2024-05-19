@@ -1,5 +1,9 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import multer from 'multer';
+import cors from 'cors';
+import fs from 'fs';
+
 import { registerValidation, loginValidation, postCreateValidation } from './validations.js';
 import { handleValidationErrors, checkAuth } from './utils/index.js';
 import { UserController, PostController } from './controllers/index.js';
@@ -51,11 +55,35 @@ const swaggerOptions = {
 
 const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
-app.use('/apidocs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+const storage = multer.diskStorage({
+  destination: (_, __, cb) => {
+    if (!fs.existsSync('uploads')) {
+      fs.mkdirSync('uploads');
+    }
+    cb(null, 'uploads');
+  },
+  filename: (_, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage });
+
+app.use(express.json());
+app.use(cors());
+app.use('/uploads', express.static('uploads'));
+
 
 app.post('/api/auth/login', loginValidation, handleValidationErrors, UserController.login);
 app.post('/api/auth/register', registerValidation, handleValidationErrors, UserController.register);
 app.get('/api/auth/me', checkAuth, UserController.getMe);
+
+app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
+  res.json({
+    url: `/uploads/${req.file.originalname}`,
+  });
+});
 
 app.get('/api/posts/tags', PostController.getLastTags);
 
