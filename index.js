@@ -3,6 +3,8 @@ import mongoose from 'mongoose';
 import { registerValidation, loginValidation, postCreateValidation } from './validations.js';
 import { handleValidationErrors, checkAuth } from './utils/index.js';
 import { UserController, PostController } from './controllers/index.js';
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
 
 mongoose
   .connect('mongodb+srv://DtmyChwsejeCGqkC:DtmyChwsejeCGqkC@cluster0.vbmxfw5.mongodb.net/lab?retryWrites=true&w=majority&appName=Cluster0')
@@ -13,19 +15,56 @@ const app = express();
 
 app.use(express.json());
 
-app.post('/auth/login', loginValidation, handleValidationErrors, UserController.login);
-app.post('/auth/register', registerValidation, handleValidationErrors, UserController.register);
-app.get('/auth/me', checkAuth, UserController.getMe);
 
-app.get('/tags', PostController.getLastTags);
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Your API Documentation',
+      version: '1.0.0',
+      description: 'API Documentation generated with Swagger',
+    },
+    servers: [
+      {
+        url: 'http://localhost:4444',
+        description: 'Development Server',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'Authorization',
+          description: 'Enter your bearer token in the format `Bearer <token>`',
+        },
+      },
+    },
+    security: [
+      {
+        BearerAuth: [],
+      },
+    ],
+  },
+  apis: ['./controllers/*.js'],
+};
 
-app.get('/posts', PostController.getAll);
-app.get('/posts/tags', PostController.getLastTags);
-app.get('/posts/:id', PostController.getOne);
-app.post('/posts', checkAuth, postCreateValidation, handleValidationErrors, PostController.create);
-app.delete('/posts/:id', checkAuth, PostController.remove);
-app.patch(
-  '/posts/:id',
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+
+app.use('/apidocs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.post('/api/auth/login', loginValidation, handleValidationErrors, UserController.login);
+app.post('/api/auth/register', registerValidation, handleValidationErrors, UserController.register);
+app.get('/api/auth/me', checkAuth, UserController.getMe);
+
+app.get('/api/posts/tags', PostController.getLastTags);
+
+app.get('/api/posts', PostController.getAll);
+app.get('/api/posts/:id', PostController.getOne);
+app.post('/api/posts', checkAuth, postCreateValidation, handleValidationErrors, PostController.create);
+app.delete('/api/posts/:id', checkAuth, PostController.remove);
+app.put(
+  '/api/posts/:id',
   checkAuth,
   postCreateValidation,
   handleValidationErrors,
