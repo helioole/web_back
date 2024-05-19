@@ -7,6 +7,8 @@ import {validationResult} from 'express-validator';
 import {registerValidation} from './validations/auth.js';
 
 import UserModel from './models/User.js';
+import checkAuth from './utils/checkAuth.js';
+import User from './models/User.js';
 
 mongoose
     .connect('mongodb+srv://DtmyChwsejeCGqkC:DtmyChwsejeCGqkC@cluster0.vbmxfw5.mongodb.net/lab?retryWrites=true&w=majority&appName=Cluster0')
@@ -98,6 +100,27 @@ app.post('/auth/register', registerValidation, async (req, res) => {
         message: 'Registration failed',
     });
 }
+});
+
+app.get('/auth/me', checkAuth, async (req, res) => {
+    try{
+        const user = await UserModel.findById(req.userId);
+
+        if(!user){
+            return res.status(404).json({
+                message:'User not found',
+            });
+        }
+
+    const {passwordHash, ...userData} = user._doc;
+
+    res.json({userData});
+    }catch(err){
+        console.log(err);
+        res.status(500).json({
+            message: 'No access',
+        });
+    }
 });
 
 app.listen(4444, (err)=>{
