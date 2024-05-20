@@ -2,7 +2,7 @@ import PostModel from '../models/Post.js';
 
 /**
  * @swagger
- * /api/posts/tags:
+ * /posts/tags:
  *   get:
  *     summary: Get last 5 tags from posts
  *     responses:
@@ -37,7 +37,7 @@ export const getLastTags = async (req, res) => {
 
 /**
 * @swagger
-* /api/posts:
+* /posts:
 *   get:
 *     summary: Retrieve all posts
 *     responses:
@@ -58,7 +58,7 @@ export const getAll = async (req, res) => {
 
 /**
 * @swagger
-* /api/posts/{id}:
+* /posts/{id}:
 *   get:
 *     summary: Retrieve a single post by ID
 *     parameters:
@@ -100,7 +100,7 @@ export const getOne = async (req, res) => {
 
 /**
 * @swagger
-* /api/posts/{id}:
+* /posts/{id}:
 *   delete:
 *     summary: Delete a single post by ID
 *     parameters:
@@ -140,7 +140,7 @@ export const remove = async (req, res) => {
 
 /**
 * @swagger
-* /api/posts:
+* /posts:
 *   post:
 *     summary: Create a new post
 *     requestBody:
@@ -187,7 +187,7 @@ export const create = async (req, res) => {
 
 /**
 * @swagger
-* /api/posts/{id}:
+* /posts/{id}:
 *   put:
 *     summary: Update a post by ID
 *     parameters:
@@ -229,9 +229,9 @@ export const update = async (req, res) => {
         text: req.body.text,
         imageUrl: req.body.imageUrl,
         user: req.userId,
-        tags: req.body.tags, // Assuming tags are separated by commas
+        tags: req.body.tags,
       },
-      { new: true } // Return the updated document
+      { new: true }
     );
 
     if (!updatedPost) {

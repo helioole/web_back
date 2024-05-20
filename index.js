@@ -19,7 +19,6 @@ const app = express();
 
 app.use(express.json());
 
-
 const swaggerOptions = {
   swaggerDefinition: {
     openapi: '3.0.0',
@@ -53,8 +52,8 @@ const swaggerOptions = {
   apis: ['./controllers/*.js'],
 };
 
-const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
 
 const storage = multer.diskStorage({
   destination: (_, __, cb) => {
@@ -74,10 +73,11 @@ app.use(express.json());
 app.use(cors());
 app.use('/uploads', express.static('uploads'));
 
+app.use('/apidocs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.post('/api/auth/login', loginValidation, handleValidationErrors, UserController.login);
-app.post('/api/auth/register', registerValidation, handleValidationErrors, UserController.register);
-app.get('/api/auth/me', checkAuth, UserController.getMe);
+app.post('/auth/login', loginValidation, handleValidationErrors, UserController.login);
+app.post('/auth/register', registerValidation, handleValidationErrors, UserController.register);
+app.get('/auth/me', checkAuth, UserController.getMe);
 
 app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
   res.json({
@@ -85,14 +85,14 @@ app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
   });
 });
 
-app.get('/api/posts/tags', PostController.getLastTags);
+app.get('/posts/tags', PostController.getLastTags);
 
-app.get('/api/posts', PostController.getAll);
-app.get('/api/posts/:id', PostController.getOne);
-app.post('/api/posts', checkAuth, postCreateValidation, handleValidationErrors, PostController.create);
-app.delete('/api/posts/:id', checkAuth, PostController.remove);
+app.get('/posts', PostController.getAll);
+app.get('/posts/:id', PostController.getOne);
+app.post('/posts', checkAuth, postCreateValidation, handleValidationErrors, PostController.create);
+app.delete('/posts/:id', checkAuth, PostController.remove);
 app.put(
-  '/api/posts/:id',
+  '/posts/:id',
   checkAuth,
   postCreateValidation,
   handleValidationErrors,
