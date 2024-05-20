@@ -2,7 +2,7 @@ import PostModel from '../models/Post.js';
 
 /**
  * @swagger
- * /posts/tags:
+ * /tags:
  *   get:
  *     summary: Get last 5 tags from posts
  *     responses:
@@ -157,9 +157,7 @@ export const remove = async (req, res) => {
 *               imageUrl:
 *                 type: string
 *               tags:
-*                 type: array
-*                 items:
-*                   type: string
+*                 type: string
 *     responses:
 *       200:
 *         description: Created post object
