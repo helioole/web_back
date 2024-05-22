@@ -45,14 +45,23 @@ export const getLastTags = async (req, res) => {
 *         description: An array of posts
 */
 export const getAll = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const pageSize = parseInt(req.query.pageSize) || 5;
+
   try {
-      const posts = await PostModel.find().populate('user').exec();
-      res.json(posts);
+
+    const posts = await PostModel.find()
+      .populate('user')
+      .skip((page - 1) * pageSize) 
+      .limit(pageSize) 
+      .exec();
+
+    const totalCount = await PostModel.countDocuments();
+
+    res.json({ posts, totalCount });
   } catch (err) {
-      console.log(err);
-      res.status(500).json({
-          message: 'Failed to get posts',
-      });
+    console.error(err);
+    res.status(500).json({ message: 'Failed to get posts' });
   }
 };
 
