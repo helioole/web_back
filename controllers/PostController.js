@@ -1,4 +1,6 @@
 import PostModel from '../models/Post.js';
+import checkAuth from '../utils/checkAuth.js';
+import checkAdmin from '../utils/checkAdmin.js';
 
 /**
  * @swagger
@@ -121,29 +123,29 @@ export const getOne = async (req, res) => {
 *     responses:
 *       200:
 *         description: Post deleted successfully
+*       403:
+*         description: No Access or Forbidden
 *       404:
 *         description: Post not found
+*     security:
+*       - BearerAuth: []
 */
 export const remove = async (req, res) => {
   try {
     const postId = req.params.id;
+    
+    const isAdmin = await checkAdmin(req.userId);
 
-    const deletedPost = await PostModel.findOneAndDelete({ _id: postId });
-
-    if (!deletedPost) {
-      return res.status(404).json({
-        message: 'Post was not found',
-      });
+    if (isAdmin) {
+      await PostModel.findByIdAndDelete(postId);
+      
+      return res.status(200).json({ message: 'Post deleted successfully' });
+    } else {
+      return res.status(403).json({ message: 'Not authorized as admin' });
     }
-
-    res.json({
-      success: true,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      message: 'Failed to delete post',
-    });
+  } catch (error) {
+    console.error('Error deleting post:', error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
@@ -258,4 +260,3 @@ export const update = async (req, res) => {
     });
   }
 };
-
